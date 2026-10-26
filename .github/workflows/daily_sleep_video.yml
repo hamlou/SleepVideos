@@ -18,6 +18,10 @@ on:
         required: true
         default: '18'
 
+permissions:
+  contents: read
+  models: read
+
 jobs:
   render_and_upload:
     runs-on: ubuntu-latest
@@ -37,13 +41,16 @@ jobs:
           pip install --upgrade pip
           pip install requests edge-tts google-api-python-client google-auth google-auth-oauthlib google-auth-httplib2
 
-      - name: 4. Run 6-Tier Free Sleep Video Generator & Private YouTube Uploader
+      - name: 4. Run Zero-Credit-Card Sleep Video Generator & Private YouTube Uploader
         env:
-          # Free LLM Keys (Add any 1 or all 5 in GitHub Repo -> Settings -> Secrets -> Actions)
-          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          # Automatic Built-in GitHub Token (Zero Signup, Zero Credit Card!)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 100% No-Credit-Card Free LLM Keys (Add any 1 or more in GitHub Secrets)
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           # Free Pexels Video Key + Make.com Callback Webhook
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
