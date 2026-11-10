@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 
-from . import media, packaging, script, youtube
+from . import audio, media, packaging, script, youtube
 from .config import Settings, load_job, mark_queue_done
 from .llm import LLM
 from .log import log, step
@@ -52,6 +52,7 @@ def run() -> int:
 
         step(f"3/6 scripts + voice + images ({len(chapters)} chapters)")
         imgs = media.Images(s)
+        voice = audio.Voice(job.voice, s.azure_key, s.azure_region)
         gap_mp3 = work / "gap.mp3"
         media.silence(gap_mp3, GAP)
         voice_files: list[Path] = []
@@ -68,16 +69,17 @@ def run() -> int:
             log(f"  {len(text.split())} words")
 
             vo = work / f"vo_{i:03d}.mp3"
-            media.tts(text, job.voice, vo)
+            dur = voice.chapter(text, work, f"c{i:03d}", vo)
             voice_files.append(vo)
-            durations.append(media.duration(vo) + (GAP if i < len(chapters) else 0))
+            durations.append(dur + (GAP if i < len(chapters) else 0))
+            log(f"  voice {dur / 60:.1f} min")
 
             got: list[Path] = []
             for k, prompt in enumerate(ch.get("image_prompts", [])[:3]):
                 dest = work / f"img_{i:03d}_{k}.jpg"
                 if imgs.ai(prompt, i * 100 + k, dest):
                     got.append(dest)
-            for k in range(2 if not got else 1):
+            for k in range(2 if not got else 0):
                 dest = work / f"img_{i:03d}_art{k}.jpg"
                 q = ch.get("art_query") or " ".join(job.topic.split()[:3])
                 for query in (q, " ".join(q.split()[:2]), GENERIC_ART[(i + k) % len(GENERIC_ART)]):
@@ -99,10 +101,11 @@ def run() -> int:
             if i < len(voice_files) - 1:
                 entries.append(gap_mp3)
         vlist.write_text("".join(f"file '{p.as_posix()}'\n" for p in entries), encoding="utf-8")
-        total = sum(durations)
-        audio = work / "master.m4a"
-        media.master_audio(vlist, total, audio)
-        total = media.duration(audio)
+        master = work / "master.m4a"
+        audio.master(vlist, sum(durations), work, master, seed=len(job.title))
+        durations[0] += audio.LEAD_IN
+        durations[-1] += audio.TAIL
+        total = media.duration(master)
         log(f"  total {total / 60:.1f} min")
 
         step("5/6 visuals")
@@ -129,7 +132,7 @@ def run() -> int:
         slist = work / "segs.txt"
         slist.write_text("".join(f"file '{p.as_posix()}'\n" for p in segs), encoding="utf-8")
         final = work / "final.mp4"
-        media.mux(slist, audio, final)
+        media.mux(slist, master, final)
         log(f"  final {final.stat().st_size / 1e9:.2f} GB, {media.duration(final) / 60:.1f} min")
 
         step("6/6 publish")
@@ -160,6 +163,7 @@ def run() -> int:
             "Narration voice is synthetic. Script researched and written with AI assistance, then reviewed. "
             "Visuals are AI-generated paintings and public-domain artworks.\n"
             + (f"\nArtwork credits:\n{credits}\n" if credits else "")
+            + f"\n{audio.FIRE_CREDIT}\n"
             + "\n#sleep #history #sleepstory"
         )
         write_out(s.out_dir, "metadata.json", {**meta, "title": title, "title_options": ranked,

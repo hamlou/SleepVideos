@@ -73,6 +73,8 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
           MAKE_CALLBACK_WEBHOOK_URL: ${{ secrets.MAKE_CALLBACK_WEBHOOK_URL }}
           VIDEO_TITLE: ${{ github.event.client_payload.video_title || inputs.video_title }}
           TOPIC_LENS: ${{ github.event.client_payload.topic_lens || inputs.topic_lens }}

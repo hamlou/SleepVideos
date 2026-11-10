@@ -58,18 +58,32 @@ class Images:
     def _cloudflare(self, prompt: str, seed: int) -> bytes | None:
         if not (self.s.cf_account and self.s.cf_token):
             return None
-        r = requests.post(
-            f"https://api.cloudflare.com/client/v4/accounts/{self.s.cf_account}/ai/run/@cf/black-forest-labs/flux-1-schnell",
-            headers={"Authorization": f"Bearer {self.s.cf_token}"},
-            json={"prompt": prompt, "steps": 8, "seed": seed},
-            timeout=120,
-        )
-        if r.status_code in (401, 402, 403, 429):
-            self.ai_dead.add("cloudflare")
-            log(f"  cloudflare images disabled (HTTP {r.status_code})")
-            return None
-        r.raise_for_status()
-        return base64.b64decode(r.json()["result"]["image"])
+        base = f"https://api.cloudflare.com/client/v4/accounts/{self.s.cf_account}/ai/run/@cf/"
+        hdr = {"Authorization": f"Bearer {self.s.cf_token}"}
+        models = [
+            ("black-forest-labs/flux-2-dev", lambda: dict(files={k: (None, str(v)) for k, v in
+                {"prompt": prompt, "width": 1920, "height": 1088, "seed": seed}.items()})),
+            ("leonardo/lucid-origin", lambda: dict(json={"prompt": prompt, "width": 1920, "height": 1088, "seed": seed})),
+            ("black-forest-labs/flux-1-schnell", lambda: dict(json={"prompt": prompt, "steps": 8})),
+        ]
+        for name, body in models:
+            if f"cf:{name}" in self.ai_dead:
+                continue
+            r = requests.post(base + name, headers=hdr, timeout=180, **body())
+            if r.status_code in (401, 403):
+                self.ai_dead.add("cloudflare")
+                log(f"  cloudflare images disabled (HTTP {r.status_code})")
+                return None
+            if r.status_code in (402, 429) or "quota" in r.text.lower() or "neurons" in r.text.lower():
+                self.ai_dead.add(f"cf:{name}")
+                log(f"  cloudflare {name} quota reached → next model")
+                continue
+            if r.status_code == 200:
+                img = (r.json().get("result") or {}).get("image")
+                if img:
+                    return base64.b64decode(img)
+            log(f"  cloudflare {name} HTTP {r.status_code}: {r.text[:120]}")
+        return None
 
     def _pollinations(self, prompt: str, seed: int) -> bytes | None:
         url = (
