@@ -8,7 +8,7 @@ import requests
 from .config import Settings
 from .log import log
 
-TIMEOUT = 300
+TIMEOUT = 150
 DEAD_CODES = {401, 402, 403, 404}
 
 

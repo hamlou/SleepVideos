@@ -51,6 +51,7 @@ class Images:
     def __init__(self, s: Settings):
         self.s = s
         self.ai_dead: set[str] = set()
+        self.strikes: dict[str, int] = {}
         self.art_seen: set[str] = set()
         self.credits: list[str] = []
 
@@ -80,8 +81,10 @@ class Images:
         if not self.s.pollinations_token and gap > 0:
             time.sleep(gap)
         self._poll_last = time.time()
-        r = requests.get(url, headers=hdr, timeout=150)
-        if r.status_code in (401, 403) or (r.status_code == 402 and "FREE_LIMIT" not in r.text):
+        r = requests.get(url, headers=hdr, timeout=90)
+        if r.status_code in (402, 429):
+            self.strikes["pollinations"] = self.strikes.get("pollinations", 0) + 1
+        if r.status_code in (401, 403) or self.strikes.get("pollinations", 0) >= 3:
             self.ai_dead.add("pollinations")
             log(f"  pollinations images disabled (HTTP {r.status_code})")
             return None
