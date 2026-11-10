@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 
-from . import media, script, youtube
+from . import media, packaging, script, youtube
 from .config import Settings, load_job, mark_queue_done
 from .llm import LLM
 from .log import log, step
@@ -134,8 +134,20 @@ def run() -> int:
 
         step("6/6 publish")
         meta = script.metadata(llm, job, chapters)
-        thumb = s.out_dir / "thumbnail.jpg"
-        media.thumbnail(chapter_imgs[0][0], meta["thumbnail_text"], thumb)
+        try:
+            refs = packaging.niche_outliers(s.yt_api_key)
+            log(f"  {len(refs)} niche outliers" if refs else "  no YOUTUBE_API_KEY → built-in title patterns")
+        except Exception as e:
+            log(f"  niche research failed ({str(e)[:150]})")
+            refs = []
+        try:
+            ranked = packaging.titles(llm, job, chapters, total / 3600, refs)
+        except Exception as e:
+            log(f"  title generation failed ({e})")
+            ranked = [job.title]
+        title = ranked[0]
+        thumbs = packaging.thumbnails(llm, imgs, job, title, chapter_imgs[0][0], s.out_dir)
+        thumb = thumbs[0]
         long = total >= 3600
         clock, marks = 0.0, []
         for ch, dur in zip(chapters, durations):
@@ -150,14 +162,16 @@ def run() -> int:
             + (f"\nArtwork credits:\n{credits}\n" if credits else "")
             + "\n#sleep #history #sleepstory"
         )
-        write_out(s.out_dir, "metadata.json", {**meta, "title": job.title, "description_full": description})
+        write_out(s.out_dir, "metadata.json", {**meta, "title": title, "title_options": ranked,
+                                                "reference_outliers": refs, "description_full": description})
 
         vid = None
         if s.youtube_ready:
-            vid = youtube.upload(s, final, thumb, job.title, description, meta["tags"], job.privacy)
+            vid = youtube.upload(s, final, thumb, title, description, meta["tags"], job.privacy)
         else:
             shutil.move(str(final), s.out_dir / "video.mp4")
             log("  saved out/video.mp4 (no YouTube secrets)")
+        packaging.review_sheet(s.out_dir, ranked, thumbs, refs, vid)
 
         if s.callback_url:
             try:

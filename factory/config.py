@@ -38,6 +38,7 @@ class Settings:
     yt_client_id: str = field(default_factory=lambda: _env("YOUTUBE_CLIENT_ID"))
     yt_client_secret: str = field(default_factory=lambda: _env("YOUTUBE_CLIENT_SECRET"))
     yt_refresh_token: str = field(default_factory=lambda: _env("YOUTUBE_REFRESH_TOKEN"))
+    yt_api_key: str = field(default_factory=lambda: _env("YOUTUBE_API_KEY"))
     callback_url: str = field(default_factory=lambda: _env("MAKE_CALLBACK_WEBHOOK_URL"))
     out_dir: Path = field(default_factory=lambda: Path(_env("OUT_DIR", "out")).resolve())
     fps: int = 30

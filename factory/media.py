@@ -291,19 +291,28 @@ def mux(seg_list: Path, audio: Path, dest: Path) -> None:
 
 def thumbnail(image: Path, text: str, dest: Path) -> None:
     f = font()
-    words = _esc(text.upper()).split()
-    lines = [" ".join(words[: (len(words) + 1) // 2]), " ".join(words[(len(words) + 1) // 2:])]
+    words = _esc(text.upper()).split()[:5]
+    cut = min(range(1, len(words)), key=lambda k: max(len(" ".join(words[:k])), len(" ".join(words[k:]))), default=1)
+    lines = [" ".join(words[:cut]), " ".join(words[cut:])]
+    lines = [l for l in lines if l]
+    size = 118 if max(len(l) for l in lines) <= 9 else 96
     draws = ""
     if f:
-        for i, ln in enumerate(l for l in lines if l):
+        y0 = 360 - (len(lines) * (size + 18)) // 2
+        for i, ln in enumerate(lines):
             draws += (
-                f",drawtext=fontfile='{f}':text='{ln}':fontsize=112:fontcolor=0xFFE7B0:borderw=6:bordercolor=black@0.85:"
-                f"x=70:y=h*0.52+{i}*130"
+                f",drawtext=fontfile='{f}':text='{ln}':fontsize={size}:fontcolor=0xFFD66B:"
+                f"borderw=7:bordercolor=0x120A04:shadowcolor=black@0.7:shadowx=5:shadowy=6:"
+                f"x=60:y={y0}+{i}*{size + 18}"
             )
     ff(
         "-i", str(image),
-        "-vf", f"scale=1280:720,eq=brightness=-0.05:saturation=1.15,vignette=PI/4{draws}",
-        "-q:v", "3", "-frames:v", "1", str(dest),
+        "-filter_complex",
+        "[0]crop=iw:ih*0.93:0:0,scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,"
+        "curves=all='0/0 0.25/0.38 0.6/0.78 1/1',eq=saturation=1.35:contrast=1.08,unsharp=5:5:0.8[img];"
+        "color=c=black:s=1280x720,format=rgba,geq=r=0:g=0:b=0:a='255*0.78*max(0,1-X/(W*0.55))'[grad];"
+        f"[img][grad]overlay=0:0,format=yuv420p{draws}",
+        "-q:v", "2", "-frames:v", "1", str(dest),
     )
 
 
