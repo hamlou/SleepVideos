@@ -1,0 +1,6 @@
+requests>=2.32
+edge-tts>=7.0
+google-api-python-client>=2.150
+google-auth>=2.35
+google-auth-httplib2>=0.2
+json-repair>=0.30

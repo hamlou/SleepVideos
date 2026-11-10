@@ -1,0 +1,12 @@
+# One video per line:  Title | topic lens
+# The daily schedule takes the first line, builds it, then moves it to topics_done.txt.
+A Rainy Night in a 14th-Century Monastery | Benedictine night offices, beeswax vs tallow candles, the scriptorium, herb garden remedies and rain-lit cloisters of a 14th-century monastery
+Life in a Medieval Tavern on a Winter Night | Hearth cooking, ale brewing, straw mattresses, travelling merchants and the innkeeper's ledger in a 1300s English tavern
+A Quiet Evening in Ancient Rome | Insulae apartments, oil lamps, bathhouse closing time, night watchmen (vigiles), bread ovens and Roman bedtime habits
+One Night in a Victorian Lighthouse | Lamp trimming, clockwork lens rotation, logbooks, foghorns, keepers' meals and storms on a 19th-century lighthouse
+The Night Shift in an Edo-Period Japanese Town | Paper lanterns, fire watchmen, public baths, tea houses, futons and winter routines in 1700s Edo
+A Snowy Night on a 1700s Colonial Farm | Candle dipping, spinning wheels, hearth bread, warming pans and barn chores on a New England farm
+Inside an Ancient Egyptian Village After Sunset | Mud-brick homes, oil lamps, bread and beer making, Nile flood calendars and tomb-builders' evenings at Deir el-Medina
+A Long Night Aboard an 18th-Century Sailing Ship | Hammocks, night watches, ship's biscuit, lantern rules, knots and navigation by stars
+Medieval Castle Life After Dark | Great hall suppers, rushlights, garderobes, chamber pots, guards' rounds and winter tapestries in a 13th-century castle
+A Rainy Evening in a 1920s Paris Bookshop | Lending libraries, coal stoves, cafe culture, typewriters and quiet rainy streets of 1920s Left Bank Paris

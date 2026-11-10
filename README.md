@@ -1,69 +1,67 @@
-# 🌙 SleepVideos Factory
+# Sleep Video Factory
 
-100% Free ($0.00/Month, ZERO Credit Card Required), production-grade automated YouTube sleep documentary generator and private uploader running entirely on free GitHub Actions compute, open-source FFmpeg procedural rendering, and multi-tier free AI engines.
+Fully automated long-form "history for sleep" videos on free GitHub Actions:
+topic → research → outline → narration script → neural voice → paintings → rendered 1080p video → YouTube upload.
 
----
+Runs daily at 06:17 UTC from `topics.txt`, or on demand.
 
-## 🏛️ Authentic "Sleepless Historian" Script Architecture
+## How it works
 
-This engine produces genuine, hypnotic, monetizable sleep documentaries following strict sleep-study guidelines:
-1. **Continuous 2nd-Person Invisible Time-Traveler Immersion:** Listener is cast as "you" safely and quietly walking through candlelit cloisters, nocturnal workshops, and rain-swept courtyards.
-2. **Sleep-Friendly Lexical Filtering (Zero Cortisol Spikes):** Explicitly filters out jarring, sudden, or violent vocabulary. Everyday hardships are reframed into dry, understated observational wit.
-3. **5-Sense Micro-History Density:** Every section weaves tactile sensory anchors (warm beeswax, damp wool, ink on vellum, glowing tallow candles, rain against leaded glass).
-4. **Non-Overlapping Room Progression:** Each chapter covers a unique physical chamber or nighttime trade to prevent repetitive phrasing across 2.5–3 hour long-form videos.
-5. **Stage Cue & Header Scrubber:** Automatically strips markdown formatting, bracketed sound cues (`[Pause]`), and chapter headings before passing to `edge-tts`.
-
----
-
-## 🎞️ 100% Key-Free Procedural Visual Engine (No Pexels Needed)
-
-- **Procedural Golden Embers (`fetch_or_create_particle_overlay`):** Uses FFmpeg `lavfi` temporal noise, bicubic scaling, Gaussian blur, and warm color balance to generate 1080p floating golden embers on a black screen.
-- **20 Dynamic Camera Cuts (00:00–02:00):** Renders 20 distinct 6-second dynamic camera cuts (pan left, pan right, lantern tilt-up, diagonal drift, push-in, and pull-out) with subtle candle-flicker light modulation from Flux paintings.
-- **Synced Ken Burns Chapters:** Loops slow, soothing zoom-in and zoom-out cycles with chapter labels for the duration of each chapter.
-
----
-
-## ⚡ 8-Tier Zero-Credit-Card Free LLM Waterfall
-
-To ensure 100% uptime with zero billing or credit cards:
-1. **Google AI Studio (`gemini-2.5-flash` with Search Grounding):** Step 1 research only (1 call/video).
-2. **Google AI Studio Gemma 3 (`gemma-3-27b-it`):** 14,400 free calls/day per key with multi-key rotation.
-3. **GroqCloud Free Tier:** Versatile Llama 3.3 70B & 8B instant fallbacks.
-4. **Cohere Trial Key:** 1,000 free calls/month (`command-r-plus-08-2024`).
-5. **Hugging Face Token:** Free serverless inference router (`Qwen2.5-72B`, `Llama-3.3-70B`).
-6. **Cerebras / OpenRouter:** High-speed free tier options.
-7. **GitHub Models API:** Built-in `GITHUB_TOKEN` calling `gpt-4o-mini` & `Meta-Llama-3.3-70B-Instruct`.
-8. **Pollinations.ai Free Engine:** Zero signup, zero API key, zero-card automated fallback.
-
----
-
-## 🔑 GitHub Repository Secrets Configuration
-
-Add these under **Repository Settings → Secrets and variables → Actions → New repository secret**:
-
-| Secret Name | Purpose | Required / Default |
+| Step | What | Free source |
 |---|---|---|
-| `GEMINI_API_KEY` | Google AI Studio Keys (supports comma-separated rotation: `key1,key2,key3`) | Highly Recommended |
-| `COHERE_API_KEY` | Cohere Trial Key | Fallback (No Card) |
-| `HF_TOKEN` | Hugging Face Free Inference Token | Fallback (No Card) |
-| `GROQ_API_KEY` | GroqCloud Free API Key | Optional Fallback |
-| `YOUTUBE_CLIENT_ID` | OAuth 2.0 Web Client ID from Google Cloud Console | Required for Upload |
-| `YOUTUBE_CLIENT_SECRET` | OAuth 2.0 Web Client Secret | Required for Upload |
-| `YOUTUBE_REFRESH_TOKEN` | OAuth 2.0 Refresh Token (from Google OAuth 2.0 Playground) | Required for Upload |
-| `MAKE_CALLBACK_WEBHOOK_URL` | Make.com Scenario 2 Webhook URL to update Google Sheets / notify | Optional |
-| `PEXELS_API_KEY` | Pexels Stock Video API Key | Optional (FFmpeg procedural engine active) |
+| 1 Research | 80 micro-facts | LLM chain (below) |
+| 2 Outline | N distinct chapters, batched 6 at a time | LLM chain |
+| 3 Script | ~1,100 words per chapter, calm 2nd-person | LLM chain |
+| 3 Voice | edge-tts neural voice, slowed and warmed | Microsoft Edge TTS |
+| 3 Images | AI paintings + public-domain museum art | Cloudflare Flux, Pollinations, The Met |
+| 4 Audio | voice + soft brown-noise rain bed, loudness-normalised | FFmpeg |
+| 5 Video | 20 intro cuts, slow Ken Burns per image, dust particles, chapter titles | FFmpeg |
+| 6 Publish | title, description, chapters, tags, thumbnail, AI disclosure | YouTube Data API |
 
----
+**LLM chain**: the first provider that works is reused; failing ones (401/402/403/404) are skipped for the rest of the run.
+`GitHub Models (built-in token)` → `Gemini` → `Groq` → `Cerebras` → `Mistral` → `OpenRouter` → `Cohere` → `Pollinations`.
+With no secrets at all, GitHub Models + Pollinations still work.
 
-## 🚀 How to Run
+## Setup (once)
 
-### Manual Dispatch (GitHub Actions Tab):
-1. Navigate to **Actions** → **Zero-Dollar Daily YouTube Sleep Video Factory**.
-2. Click **Run workflow**.
-3. Choose `num_chapters`:
-   - `2` or `3` for a quick 15-20 minute test build.
-   - `18` for a full 2.5–3 hour sleep documentary.
-4. When finished, your video will be waiting in **YouTube Studio** as a **Private Draft** with chapters, tags, and Synthetic Media disclosure already pre-filled.
+### 1. Secrets (Settings → Secrets and variables → Actions)
 
-### Automated Daily Dispatch (Make.com):
-- Import `make_com_sleep_video_blueprint.json` into Make.com to trigger daily video generation from your Google Sheets topic queue.
+| Secret | Needed? | Where to get it |
+|---|---|---|
+| `YOUTUBE_CLIENT_ID` | for upload | Google Cloud → APIs → enable *YouTube Data API v3* → Credentials → OAuth client (Web), redirect `https://developers.google.com/oauthplayground` |
+| `YOUTUBE_CLIENT_SECRET` | for upload | same |
+| `YOUTUBE_REFRESH_TOKEN` | for upload | [OAuth Playground](https://developers.google.com/oauthplayground) → ⚙ "Use your own OAuth credentials" → scope `https://www.googleapis.com/auth/youtube.upload` → exchange → copy refresh token |
+| `GEMINI_API_KEY` | recommended | aistudio.google.com (comma-separate several keys) |
+| `GROQ_API_KEY` | optional | console.groq.com |
+| `CEREBRAS_API_KEY` | optional | cloud.cerebras.ai |
+| `MISTRAL_API_KEY` | optional | console.mistral.ai (free tier) |
+| `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` | recommended | dash.cloudflare.com → Workers AI (free daily quota), token with *Workers AI* permission. Better images than Pollinations. |
+| `POLLINATIONS_TOKEN` | optional | auth.pollinations.ai (higher limits) |
+| `MAKE_CALLBACK_WEBHOOK_URL` | optional | Make.com webhook, receives `{status, sheet_row_id, youtube_video_id, ...}` |
+
+> ⚠️ **Refresh token dies after 7 days** if the Google OAuth consent screen is in *Testing*. Set it to **In production** (no review needed for your own channel), then mint the refresh token.
+> Uploads via an unverified API project are locked **private** by YouTube until the project passes an audit. Private is the default here anyway — review, then publish.
+
+### 2. Optional variables (Settings → Variables)
+`NUM_CHAPTERS` (default 18 ≈ 2.5–3 h) · `VOICE_NAME` (default `en-US-AndrewMultilingualNeural`) · `PRIVACY_STATUS` (default `private`)
+
+## Run
+
+- **Test**: Actions → *Sleep Video Factory* → Run workflow → chapters `2` (~15 min video, ~20 min build).
+- **Daily**: automatic. Takes the first line of `topics.txt`, moves it to `topics_done.txt` after success.
+- **Make.com**: `repository_dispatch` type `build_sleep_video` with `client_payload` `{video_title, topic_lens, num_chapters, voice_name, sheet_row_id}`.
+
+Every run uploads an artifact with `script.md`, `outline.json`, `metadata.json`, `thumbnail.jpg` (and `video.mp4` when YouTube secrets are missing).
+
+## Local run
+
+```bash
+pip install -r requirements.txt   # plus ffmpeg on PATH
+NUM_CHAPTERS=2 VIDEO_TITLE="..." TOPIC_LENS="..." python -m factory.main
+```
+
+## Monetization notes
+
+YouTube's "inauthentic / mass-produced content" policy is the real risk for automated channels, not the tech.
+What this pipeline already does: unique researched script per video, chapters, disclosure of synthetic voice (`containsSyntheticMedia`), public-domain credits, private-first uploads.
+What you should still do: watch/skim each video before publishing, edit titles/thumbnails by hand, keep a consistent channel voice, and don't publish more than ~1/day.
