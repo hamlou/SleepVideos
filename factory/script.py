@@ -12,7 +12,8 @@ NARRATION RULES (sleep documentary, calm "boring history" style):
 3. Every paragraph weaves at least two soft sensory details (woodsmoke, beeswax, damp wool, rain on glass, quill on vellum, amber light).
 4. Long, unhurried, flowing sentences. Occasional quiet humour about mundane routines.
 5. Historically accurate, specific micro-details: names of tools, materials, prices, routines. No invented quotes.
-6. Output ONLY spoken prose. No headings, no titles, no lists, no markdown, no stage directions, no [brackets].
+6. NO RELIGION of any kind: no churches, mosques, temples, monks, priests, prayer, worship, saints, gods, scripture, crosses or religious holidays. Focus only on everyday secular life, crafts, food, homes, work, nature and weather.
+7. Output ONLY spoken prose. No headings, no titles, no lists, no markdown, no stage directions, no [brackets].
 """.strip()
 
 
@@ -64,7 +65,7 @@ def research(llm: LLM, job: Job) -> str:
         f"List 80 specific, accurate, lesser-known micro-facts about lived daily and nightly reality: "
         f"architecture and lighting, heating, clothing and bedding, food and drink, trades and tools, "
         f"routines, rules, sounds, smells, weather and small superstitions. "
-        f"Avoid battles and dramatic politics. One fact per line, plain text."
+        f"Avoid battles, dramatic politics and ANY religious topics (no churches, monks, prayer, gods, temples, clergy, worship). One fact per line, plain text."
     )
 
 
@@ -80,7 +81,7 @@ def outline(llm: LLM, job: Job, notes: str) -> list[dict]:
             f"Plan chapters {start}-{start + n - 1} of a {job.chapters}-chapter sleep documentary titled "
             f"'{job.title}' about: {job.topic}.\n"
             f"Chapters already planned (do NOT repeat their place or routine): {used}.\n"
-            f"Every chapter = one distinct physical space or nightly routine, in a gentle walking order.\n"
+            f"Every chapter = one distinct physical space or nightly routine, in a gentle walking order. Never use religious places, clergy, prayer or religious objects.\n"
             f"Return JSON: {{\"chapters\": [{{\"title\": \"short evocative title\", "
             f"\"setting\": \"room, hour, weather, smells, sounds\", "
             f"\"facts\": \"6-10 micro-facts from the notes used ONLY in this chapter\", "
@@ -88,7 +89,7 @@ def outline(llm: LLM, job: Job, notes: str) -> list[dict]:
             f"\"art_query\": \"2-4 word search for a matching public-domain museum painting\", "
             f"\"image_prompts\": [\"3 detailed scene descriptions\"]}}]}}\n"
             f"Each image prompt: one concrete scene, warm candle or lantern light, deep blue night shadows, "
-            f"historical oil painting style, no people's faces in close-up, no text.\n\n"
+            f"historical oil painting style, no people's faces in close-up, no text, no religious buildings or symbols (no crosses, churches, monks).\n\n"
             f"Research notes:\n{notes[:9000]}",
             json_mode=True,
             validate=_valid_json("chapters"),

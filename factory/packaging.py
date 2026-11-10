@@ -75,7 +75,7 @@ def titles(llm: LLM, job: Job, chapters: list[dict], hours: float, refs: list[di
         f"{examples}\n\n"
         f"Study their structure (curiosity hook, 'for sleep' promise, duration, specific era/place). "
         f"Write 10 NEW titles for this video that copy those proven structures, not their words. "
-        f"Rules: max 70 characters, accurate to the video content, no clickbait lies, no ALL CAPS words, "
+        f"Rules: max 70 characters, accurate to the video content, no clickbait lies, no ALL CAPS words, nothing religious, "
         f"include the sleep promise, at least 4 include the length '({dur})'.\n"
         f"Then rank them by expected click-through for a sleepy viewer browsing at night.\n"
         f'Return JSON: {{"ranked": ["best title", "...10 total"]}}',
@@ -93,7 +93,7 @@ def thumbnails(llm: LLM, imgs: media.Images, job: Job, title: str, fallback: Pat
         raw = llm.ask(
             f"Design 3 different YouTube thumbnails for a calm history sleep video titled '{title}' about {job.topic}.\n"
             f"Proven sleep-niche style: ONE clear subject, cozy warm light against deep night blue, "
-            f"lots of empty dark space on the left for text, no people looking at camera, painterly.\n"
+            f"lots of empty dark space on the left for text, no people looking at camera, no religious buildings, symbols or figures, painterly.\n"
             f"Text: 2-4 short words (max 18 characters total) that ADD a specific, TRUE curiosity hook drawn from "
             f"this topic's real details: a time, a number, an object or an odd custom. Never repeat the title. "
             f"Each of the 3 must use a different angle (time/number, odd fact, cozy promise).\n"

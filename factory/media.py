@@ -94,7 +94,7 @@ class Images:
         return None
 
     def ai(self, prompt: str, seed: int, dest: Path) -> bool:
-        full = f"{prompt}, wide cinematic composition, rich oil painting, warm candlelight, deep blue shadows, no text, no watermark"
+        full = f"{prompt}, wide cinematic composition, rich oil painting, warm candlelight, deep blue shadows, no text, no watermark, no crosses, no religious symbols"
         for name, fn in (("cloudflare", self._cloudflare), ("pollinations", self._pollinations)):
             if name in self.ai_dead:
                 continue
