@@ -3,7 +3,7 @@
 Fully automated long-form "history for sleep" videos on free GitHub Actions:
 topic → research → outline → narration script → neural voice → paintings → rendered 1080p video → YouTube upload.
 
-Runs daily at 06:17 UTC from `topics.txt`, or on demand.
+Runs daily at 02:07 Tunisia time (01:07 UTC) from `topics.txt`, or on demand.
 
 ## How it works
 

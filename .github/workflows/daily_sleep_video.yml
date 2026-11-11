@@ -2,7 +2,7 @@ name: Sleep Video Factory
 
 on:
   schedule:
-    - cron: "17 6 * * *"
+    - cron: "7 1 * * *"
   repository_dispatch:
     types: [build_sleep_video]
   workflow_dispatch:
