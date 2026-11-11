@@ -50,8 +50,23 @@ def run() -> int:
         chapters = script.outline(llm, job, notes)
         write_out(s.out_dir, "outline.json", chapters)
 
-        step(f"3/6 scripts + voice + images ({len(chapters)} chapters)")
+        step("titles + thumbnails (first, so they get the best image model)")
         imgs = media.Images(s)
+        try:
+            refs = packaging.niche_outliers(s.yt_api_key)
+            log(f"  {len(refs)} niche outliers" if refs else "  no YOUTUBE_API_KEY → built-in title patterns")
+        except Exception as e:
+            log(f"  niche research failed ({str(e)[:150]})")
+            refs = []
+        try:
+            ranked = packaging.titles(llm, job, chapters, job.chapters * 11.5 / 60, refs)
+        except Exception as e:
+            log(f"  title generation failed ({e})")
+            ranked = [job.title]
+        title = ranked[0]
+        thumbs = packaging.thumbnails(llm, imgs, job, title, None, s.out_dir)
+
+        step(f"3/6 scripts + voice + images ({len(chapters)} chapters)")
         voice = audio.Voice(job.voice, s.azure_key, s.azure_region)
         gap_mp3 = work / "gap.mp3"
         media.silence(gap_mp3, GAP)
@@ -75,11 +90,11 @@ def run() -> int:
             log(f"  voice {dur / 60:.1f} min")
 
             got: list[Path] = []
-            for k, prompt in enumerate(ch.get("image_prompts", [])[:3]):
+            for k, prompt in enumerate(ch.get("image_prompts", [])[:2]):
                 dest = work / f"img_{i:03d}_{k}.jpg"
                 if imgs.ai(prompt, i * 100 + k, dest):
                     got.append(dest)
-            for k in range(2 if not got else 0):
+            for k in range(3 - len(got)):
                 dest = work / f"img_{i:03d}_art{k}.jpg"
                 q = ch.get("art_query") or " ".join(job.topic.split()[:3])
                 for query in (q, " ".join(q.split()[:2]), GENERIC_ART[(i + k) % len(GENERIC_ART)]):
@@ -137,19 +152,8 @@ def run() -> int:
 
         step("6/6 publish")
         meta = script.metadata(llm, job, chapters)
-        try:
-            refs = packaging.niche_outliers(s.yt_api_key)
-            log(f"  {len(refs)} niche outliers" if refs else "  no YOUTUBE_API_KEY → built-in title patterns")
-        except Exception as e:
-            log(f"  niche research failed ({str(e)[:150]})")
-            refs = []
-        try:
-            ranked = packaging.titles(llm, job, chapters, total / 3600, refs)
-        except Exception as e:
-            log(f"  title generation failed ({e})")
-            ranked = [job.title]
-        title = ranked[0]
-        thumbs = packaging.thumbnails(llm, imgs, job, title, chapter_imgs[0][0], s.out_dir)
+        if not thumbs:
+            thumbs = packaging.thumbnails(llm, imgs, job, title, chapter_imgs[0][0], s.out_dir)
         thumb = thumbs[0]
         long = total >= 3600
         clock, marks = 0.0, []

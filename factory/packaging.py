@@ -87,7 +87,7 @@ def titles(llm: LLM, job: Job, chapters: list[dict], hours: float, refs: list[di
     return ranked[:10] or [job.title]
 
 
-def thumbnails(llm: LLM, imgs: media.Images, job: Job, title: str, fallback: Path, out: Path) -> list[Path]:
+def thumbnails(llm: LLM, imgs: media.Images, job: Job, title: str, fallback: Path | None, out: Path) -> list[Path]:
     step("thumbnails")
     try:
         raw = llm.ask(
@@ -109,7 +109,9 @@ def thumbnails(llm: LLM, imgs: media.Images, job: Job, title: str, fallback: Pat
     for i, c in enumerate(concepts, 1):
         base = out / f"thumb_base_{i}.jpg"
         prompt = f"{c.get('scene', job.topic)}, subject on the right third, dark empty left side, high contrast, glowing warm light"
-        if not imgs.ai(prompt, 9000 + i, base):
+        if not imgs.ai(prompt, 9000 + i, base, premium=True):
+            if fallback is None:
+                continue
             base = fallback
         dest = out / f"thumbnail_{i}.jpg"
         media.thumbnail(base, str(c.get("text", "FALL ASLEEP")), dest)

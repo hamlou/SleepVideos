@@ -47,6 +47,12 @@ def _esc(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9 .!?&\-]", "", text)
 
 
+RELIGIOUS = ("saint", "st. ", "holy", "madonna", "virgin", "christ", "jesus", "annunciation", "magdalen",
+             "crucifix", "nativity", "adoration", "apostle", "angel", "god", "church", "cathedral", "monk", "nun",
+             "pope", "bishop", "prayer", "bible", "biblical", "religious", "mosque", "temple", "buddha", "deity",
+             "martyr", "baptism", "resurrection", "pietà", "pieta", "prophet", "sacred", "altar", "chapel", "abbey")
+
+
 class Images:
     def __init__(self, s: Settings):
         self.s = s
@@ -55,17 +61,17 @@ class Images:
         self.art_seen: set[str] = set()
         self.credits: list[str] = []
 
-    def _cloudflare(self, prompt: str, seed: int) -> bytes | None:
+    def _cloudflare(self, prompt: str, seed: int, premium: bool = False) -> bytes | None:
         if not (self.s.cf_account and self.s.cf_token):
             return None
         base = f"https://api.cloudflare.com/client/v4/accounts/{self.s.cf_account}/ai/run/@cf/"
         hdr = {"Authorization": f"Bearer {self.s.cf_token}"}
-        models = [
-            ("black-forest-labs/flux-2-dev", lambda: dict(files={k: (None, str(v)) for k, v in
-                {"prompt": prompt, "width": 1920, "height": 1088, "seed": seed}.items()})),
-            ("leonardo/lucid-origin", lambda: dict(json={"prompt": prompt, "width": 1920, "height": 1088, "seed": seed})),
+        mp = lambda w, h: dict(files={k: (None, str(v)) for k, v in {"prompt": prompt, "width": w, "height": h}.items()})
+        cheap = [
+            ("black-forest-labs/flux-2-klein-4b", lambda: mp(1344, 768)),
             ("black-forest-labs/flux-1-schnell", lambda: dict(json={"prompt": prompt, "steps": 8})),
         ]
+        models = ([("black-forest-labs/flux-2-dev", lambda: mp(1280, 720))] + cheap) if premium else cheap
         for name, body in models:
             if f"cf:{name}" in self.ai_dead:
                 continue
@@ -107,9 +113,10 @@ class Images:
         log(f"  pollinations image HTTP {r.status_code} {r.headers.get('content-type', '')} {len(r.content)}B")
         return None
 
-    def ai(self, prompt: str, seed: int, dest: Path) -> bool:
+    def ai(self, prompt: str, seed: int, dest: Path, premium: bool = False) -> bool:
         full = f"{prompt}, wide cinematic composition, rich oil painting, warm candlelight, deep blue shadows, no text, no watermark, no crosses, no religious symbols"
-        for name, fn in (("cloudflare", self._cloudflare), ("pollinations", self._pollinations)):
+        cf = lambda p, sd: self._cloudflare(p, sd, premium)
+        for name, fn in (("cloudflare", cf), ("pollinations", self._pollinations)):
             if name in self.ai_dead:
                 continue
             for attempt in range(3):
@@ -133,7 +140,7 @@ class Images:
         try:
             r = requests.get(
                 f"{met}/v1.1/search",
-                params={"q": query, "hasImages": "true", "isPublicDomain": "true", "limit": 25},
+                params={"q": query, "hasImages": "true", "isPublicDomain": "true", "medium": "Paintings", "limit": 30},
                 headers=UA,
                 timeout=30,
             )
@@ -144,6 +151,11 @@ class Images:
                 o = requests.get(f"{met}/v1/objects/{oid}", headers=UA, timeout=30)
                 if o.status_code == 200:
                     d = o.json()
+                    text = " ".join([d.get("title") or "", d.get("objectName") or ""] + [t.get("term", "") for t in (d.get("tags") or [])]).lower()
+                    if any(w in text for w in RELIGIOUS):
+                        continue
+                    if d.get("classification") != "Paintings":
+                        continue
                     if d.get("isPublicDomain") and (d.get("primaryImage") or d.get("primaryImageSmall")):
                         objs.append(d)
             objs.sort(key=lambda d: d.get("classification") not in ("Paintings", "Drawings"))
