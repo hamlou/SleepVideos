@@ -50,7 +50,7 @@ def run() -> int:
         chapters = script.outline(llm, job, notes)
         write_out(s.out_dir, "outline.json", chapters)
 
-        step("titles + thumbnails (first, so they get the best image model)")
+        step("titles + thumbnail prompts")
         imgs = media.Images(s)
         try:
             refs = packaging.niche_outliers(s.yt_api_key)
@@ -64,7 +64,12 @@ def run() -> int:
             log(f"  title generation failed ({e})")
             ranked = [job.title]
         title = ranked[0]
-        thumbs = packaging.thumbnails(llm, imgs, job, title, None, s.out_dir)
+        try:
+            brief = packaging.thumbnail_brief(llm, job, title, chapters)
+        except Exception as e:
+            log(f"  thumbnail brief failed ({e})")
+            brief = "(thumbnail brief unavailable)"
+        write_out(s.out_dir, "THUMBNAIL_PROMPTS.md", brief)
 
         step(f"3/6 scripts + voice + images ({len(chapters)} chapters)")
         voice = audio.Voice(job.voice, s.azure_key, s.azure_region)
@@ -152,9 +157,6 @@ def run() -> int:
 
         step("6/6 publish")
         meta = script.metadata(llm, job, chapters)
-        if not thumbs:
-            thumbs = packaging.thumbnails(llm, imgs, job, title, chapter_imgs[0][0], s.out_dir)
-        thumb = thumbs[0]
         long = total >= 3600
         clock, marks = 0.0, []
         for ch, dur in zip(chapters, durations):
@@ -175,16 +177,17 @@ def run() -> int:
 
         vid = None
         if s.youtube_ready:
-            vid = youtube.upload(s, final, thumb, title, description, meta["tags"], job.privacy)
+            vid = youtube.upload(s, final, None, title, description, meta["tags"], job.privacy)
         else:
             shutil.move(str(final), s.out_dir / "video.mp4")
             log("  saved out/video.mp4 (no YouTube secrets)")
-        packaging.review_sheet(s.out_dir, ranked, thumbs, refs, vid)
+        packaging.review_sheet(s.out_dir, ranked, brief, refs, vid)
 
         if s.callback_url:
             try:
                 requests.post(s.callback_url, json={
-                    "status": "completed", "sheet_row_id": job.sheet_row, "title": job.title,
+                    "status": "completed", "sheet_row_id": job.sheet_row, "title": title, "title_options": ranked[:3],
+                    "thumbnail_prompts": brief,
                     "duration_hours": round(total / 3600, 2), "youtube_video_id": vid,
                     "youtube_studio_url": f"https://studio.youtube.com/video/{vid}/edit" if vid else None,
                 }, timeout=30)

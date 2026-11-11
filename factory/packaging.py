@@ -87,6 +87,34 @@ def titles(llm: LLM, job: Job, chapters: list[dict], hours: float, refs: list[di
     return ranked[:10] or [job.title]
 
 
+def thumbnail_brief(llm: LLM, job: Job, title: str, chapters: list[dict]) -> str:
+    step("thumbnail master prompts")
+    raw = llm.ask(
+        f"You are a YouTube thumbnail art director for a calm 'history for sleep' channel.\n"
+        f"Video title: {title}\nTopic: {job.topic}\nChapters: {'; '.join(c['title'] for c in chapters)}\n\n"
+        f"Write 3 different thumbnail concepts. For each give:\n"
+        f"- image_prompt: a complete, detailed prompt for an AI image tool (Midjourney / ChatGPT / Ideogram / Leonardo), "
+        f"16:9, ONE clear focal subject placed on the right third, the left 40% dark and empty for text, cozy warm firelight "
+        f"or lantern glow against deep night blue, painterly cinematic oil-painting style, high contrast so it reads at small size. "
+        f"Describe ONLY what is visible (homes, fire, food, tools, weather, landscape); no towers, spires or places of worship; "
+        f"no faces looking at camera; no text in the image.\n"
+        f"- overlay_text: 2-4 words, max 18 characters, a specific TRUE curiosity hook from the topic, never repeating the title.\n"
+        f"- design_notes: font style, text color, where to place it, one tip to make it pop.\n"
+        f'Return JSON: {{"concepts": [{{"image_prompt": "...", "overlay_text": "...", "design_notes": "..."}}]}}',
+        json_mode=True,
+        validate=lambda t: len(parse_json(t).get("concepts", [])) >= 1,
+    )
+    concepts = parse_json(raw)["concepts"][:3]
+    out = [f"# Thumbnail master prompts", "", f"**Video:** {title}", ""]
+    for i, c in enumerate(concepts, 1):
+        out += [f"## Concept {i}: \"{c.get('overlay_text', '')}\"", "", "**Image prompt (copy-paste):**", "```",
+                str(c.get("image_prompt", "")).strip(), "```", "",
+                f"**Text on thumbnail:** {c.get('overlay_text', '')}", "",
+                f"**Design notes:** {c.get('design_notes', '')}", ""]
+    log(f"  {len(concepts)} thumbnail concepts")
+    return "\n".join(out)
+
+
 def thumbnails(llm: LLM, imgs: media.Images, job: Job, title: str, fallback: Path | None, out: Path) -> list[Path]:
     step("thumbnails")
     try:
@@ -122,18 +150,18 @@ def thumbnails(llm: LLM, imgs: media.Images, job: Job, title: str, fallback: Pat
     return paths
 
 
-def review_sheet(out: Path, ranked: list[str], thumbs: list[Path], refs: list[dict], vid: str | None) -> None:
+def review_sheet(out: Path, ranked: list[str], brief: str, refs: list[dict], vid: str | None) -> None:
     lines = ["# Review before publishing", ""]
     if vid:
         lines += [f"Studio: https://studio.youtube.com/video/{vid}/edit", ""]
     lines += ["## Titles (best first) — top 3 go into Test & Compare", ""]
     lines += [f"{i}. {t}" for i, t in enumerate(ranked, 1)]
-    lines += ["", "## Thumbnails", ""] + [f"- {p.name}" for p in thumbs]
+    lines += ["", brief.replace("# Thumbnail master prompts", "## Thumbnail master prompts")]
     if refs:
         lines += ["", "## Niche outliers used as reference", ""]
         lines += [f"- {r['title']} — {r['views']:,} views, {r['score']:.1f}x" for r in refs]
     lines += ["", "## Publish checklist",
               "1. Skim the video (voice, images, no glitches)",
-              "2. Studio → Test & Compare: add titles 1-3 and the 3 thumbnails",
+              "2. Make the thumbnail from a concept above, upload it, add titles 1-3 to Test & Compare",
               "3. Visibility → Schedule (evening in your audience's timezone)"]
     (out / "REVIEW.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
