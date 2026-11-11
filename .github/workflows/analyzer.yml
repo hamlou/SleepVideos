@@ -1,0 +1,42 @@
+name: Analyzer
+
+on:
+  schedule:
+    - cron: "37 0 * * *"
+  repository_dispatch:
+    types: [analyze_now]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: analyzer
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Analyze videos 72h after publishing
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m factory.analyze ${{ github.event_name == 'schedule' && '' || '--force' }}
+      - name: Save state
+        if: always()
+        run: bash scripts/commit_data.sh "analysis"

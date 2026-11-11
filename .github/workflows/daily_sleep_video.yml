@@ -4,26 +4,13 @@ on:
   schedule:
     - cron: "7 1 * * *"
   repository_dispatch:
-    types: [build_sleep_video]
+    types: [build_sleep_video, render_now]
   workflow_dispatch:
     inputs:
-      video_title:
-        description: "Title (blank = next line of topics.txt)"
-        required: false
-        default: ""
-      topic_lens:
-        description: "Topic / lens (blank = next line of topics.txt)"
-        required: false
-        default: ""
       num_chapters:
-        description: "Chapters (2 = ~15 min test, 18 = ~3 h)"
-        required: true
-        default: "2"
-      privacy:
-        description: "YouTube privacy"
-        type: choice
-        options: [private, unlisted, public]
-        default: private
+        description: "Chapters (blank = bot setting; 2 = quick test)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -40,24 +27,33 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Paused?
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && grep -q '"paused": *true' data/settings.json 2>/dev/null; then
+            echo "Nightly run paused from the bot."; echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-python@v6
+        if: steps.gate.outputs.skip != '1'
         with:
           python-version: "3.12"
           cache: pip
 
-      - name: Install FFmpeg (static build, no apt)
+      - name: Install FFmpeg (static build)
+        if: steps.gate.outputs.skip != '1'
         run: |
           set -e
           curl -fsSL --retry 5 -o /tmp/ff.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
           mkdir -p /opt/ffmpeg && tar -xf /tmp/ff.tar.xz -C /opt/ffmpeg --strip-components=1
           echo "/opt/ffmpeg/bin" >> "$GITHUB_PATH"
-          /opt/ffmpeg/bin/ffmpeg -hide_banner -version | head -1
-          ls /usr/share/fonts/truetype/dejavu/ || echo "no dejavu fonts (chapter labels will be skipped)"
 
       - name: Install Python deps
+        if: steps.gate.outputs.skip != '1'
         run: pip install -r requirements.txt
 
       - name: Build and upload video
+        if: steps.gate.outputs.skip != '1'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -77,26 +73,20 @@ jobs:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
           AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
-          MAKE_CALLBACK_WEBHOOK_URL: ${{ secrets.MAKE_CALLBACK_WEBHOOK_URL }}
-          VIDEO_TITLE: ${{ github.event.client_payload.video_title || inputs.video_title }}
-          TOPIC_LENS: ${{ github.event.client_payload.topic_lens || inputs.topic_lens }}
-          NUM_CHAPTERS: ${{ github.event.client_payload.num_chapters || inputs.num_chapters || vars.NUM_CHAPTERS || '18' }}
-          VOICE_NAME: ${{ github.event.client_payload.voice_name || vars.VOICE_NAME || 'en-US-AndrewMultilingualNeural' }}
-          SHEET_ROW_ID: ${{ github.event.client_payload.sheet_row_id }}
-          PRIVACY_STATUS: ${{ inputs.privacy || vars.PRIVACY_STATUS || 'private' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          VIDEO_TITLE: ${{ github.event.client_payload.video_title }}
+          TOPIC_LENS: ${{ github.event.client_payload.topic_lens }}
+          NUM_CHAPTERS: ${{ github.event.client_payload.num_chapters || inputs.num_chapters }}
           OUT_DIR: out
         run: python -m factory.main
 
-      - name: Commit topic queue
-        if: success()
-        run: |
-          git config user.name "sleep-factory-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add topics.txt topics_done.txt 2>/dev/null || true
-          git diff --cached --quiet || { git commit -m "queue: mark topic done [skip ci]" && git pull --rebase && git push; }
+      - name: Save state
+        if: always() && steps.gate.outputs.skip != '1'
+        run: bash scripts/commit_data.sh "video build ${{ github.run_number }}"
 
       - name: Save outputs
-        if: always()
+        if: always() && steps.gate.outputs.skip != '1'
         uses: actions/upload-artifact@v4
         with:
           name: sleep-video-${{ github.run_number }}

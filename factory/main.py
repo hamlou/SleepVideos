@@ -6,8 +6,8 @@ from pathlib import Path
 
 import requests
 
-from . import audio, broll, media, packaging, script, youtube
-from .config import QUEUE_FILE, Settings, load_job, mark_queue_done
+from . import audio, broll, media, packaging, script, state, telegram, topics, youtube
+from .config import Job, Settings, _env
 from .llm import LLM
 from .log import log, step
 
@@ -31,21 +31,43 @@ def write_out(out: Path, name: str, data) -> None:
     p.write_text(data if isinstance(data, str) else json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
+def notify_ready(vid: str, title: str, description: str, brief: str, total: float) -> None:
+    telegram.send(
+        f"✅ <b>New video ready (private)</b>\n\n<b>{telegram.esc(title)}</b>\n"
+        f"{total / 3600:.1f} h · https://youtu.be/{vid}\n\n<b>Description</b>\n{telegram.esc(description[:1500])}"
+    )
+    concepts = brief.split("## Concept ")[1:]
+    for i, c in enumerate(concepts, 1):
+        body = c.split("```")
+        prompt = body[1].strip() if len(body) > 2 else c
+        rest = body[2].strip() if len(body) > 2 else ""
+        head = c.splitlines()[0].split(":", 1)[-1].strip()
+        telegram.send(f"🎨 <b>Concept {i}</b> — {telegram.esc(head)}\n\n<code>{telegram.esc(prompt)}</code>\n\n{telegram.esc(rest)}")
+    telegram.send(
+        "When your thumbnail is ready, tap the concept you used, then send the image here.\n"
+        "The video goes <b>public</b> as soon as the thumbnail is set.",
+        buttons=[[(f"🖼 Concept {i}", f"thumb:{vid}:{i}") for i in range(1, len(concepts) + 1)],
+                 [("🚀 Publish without thumbnail", f"pub:{vid}")]],
+    )
+
+
 def run() -> int:
     s = Settings()
     s.out_dir.mkdir(parents=True, exist_ok=True)
     media.ensure_tools()
-    job = load_job()
-    if not job:
-        log("topics.txt is empty → inventing a new topic")
-        title, topic = script.new_topic(LLM(s))
-        QUEUE_FILE.write_text(f"{title} | {topic}\n", encoding="utf-8")
-        job = load_job()
+    llm = LLM(s)
+    if _env("VIDEO_TITLE") and _env("TOPIC_LENS"):
+        pick = {"title": _env("VIDEO_TITLE"), "topic": _env("TOPIC_LENS"), "source": "dispatch"}
+    else:
+        pick = topics.next_topic(llm)
+    job = Job(title=pick["title"], topic=pick["topic"], chapters=max(1, int(_env("NUM_CHAPTERS") or state.settings()["chapters"])),
+              voice=_env("VOICE_NAME") or state.settings()["voice"], sheet_row=_env("SHEET_ROW_ID"),
+              privacy="private", from_queue=pick.get("source") != "dispatch")
     log(f"JOB: {job.title} | {job.chapters} chapters | voice {job.voice} | privacy {job.privacy}")
     write_out(s.out_dir, "job.json", job.__dict__)
     youtube.check_auth(s)
-
-    llm = LLM(s)
+    telegram.send(f"🎬 Started tonight's video: <b>{telegram.esc(job.title)}</b>\n"
+                  f"{job.chapters} chapters · playbook v{state.playbook()['version']}")
     work = Path(tempfile.mkdtemp(prefix="sleep_"))
     try:
         notes = script.research(llm, job)
@@ -206,12 +228,28 @@ def run() -> int:
                 }, timeout=30)
             except Exception as e:
                 log(f"  callback failed: {e}")
-        if job.from_queue:
-            mark_queue_done(job.title)
+        topics.mark_done(job.title, job.topic)
+        try:
+            topics.refill(llm)
+        except Exception as e:
+            log(f"  topic refill failed: {e}")
+        if vid:
+            starts = [sum(durations[:i]) for i in range(len(durations))]
+            state.save_video({
+                "id": vid, "created": state.now(), "status": "private", "published": None, "analyzed": None,
+                "title": title, "working_title": job.title, "topic": job.topic, "title_options": ranked,
+                "description": description, "tags": meta["tags"], "thumbnail_brief": brief, "thumb_concept": None,
+                "chapters": [{"title": c["title"], "start": round(st, 1)} for c, st in zip(chapters, starts)],
+                "duration_sec": round(total, 1), "playbook_version": state.playbook()["version"],
+                "stock_clips": len(stock.sources), "images": sum(len(g) for g in chapter_imgs),
+            })
+            notify_ready(vid, title, description, brief, total)
         write_out(s.out_dir, "result.json", {"youtube_id": vid, "minutes": round(total / 60, 1)})
         log("DONE ✓")
         return 0
-    except Exception:
+    except Exception as e:
+        telegram.send(f"❌ Tonight's video failed: <b>{telegram.esc(job.title)}</b>\n"
+                      f"<code>{telegram.esc(str(e)[:400])}</code>\nThe watcher will diagnose it.")
         if s.callback_url:
             try:
                 requests.post(s.callback_url, json={"status": "failed", "sheet_row_id": job.sheet_row, "title": job.title}, timeout=30)

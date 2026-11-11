@@ -3,7 +3,7 @@ from pathlib import Path
 
 import requests
 
-from . import media
+from . import media, state
 from .config import Job, Settings
 from .llm import LLM
 from .log import log, step
@@ -78,6 +78,9 @@ def titles(llm: LLM, job: Job, chapters: list[dict], hours: float, refs: list[di
         f"Rules: max 70 characters, accurate to the video content, no clickbait lies, no ALL CAPS words, nothing religious, "
         f"include the sleep promise, at least 4 include the length '({dur})'.\n"
         f"Then rank them by expected click-through for a sleepy viewer browsing at night.\n"
+        f"Do NOT reuse the structure of these recent channel titles (variety avoids looking spammy):\n"
+        + "\n".join(f"- {t}" for t in state.recent("title", 8)) + "\n"
+        f"{state.playbook_text(['title_rules'])}\n"
         f'Return JSON: {{"ranked": ["best title", "...10 total"]}}',
         json_mode=True,
         validate=lambda t: len(parse_json(t).get("ranked", [])) >= 3,
@@ -92,6 +95,7 @@ def thumbnail_brief(llm: LLM, job: Job, title: str, chapters: list[dict]) -> str
     raw = llm.ask(
         f"You are a YouTube thumbnail art director for a calm 'history for sleep' channel.\n"
         f"Video title: {title}\nTopic: {job.topic}\nChapters: {'; '.join(c['title'] for c in chapters)}\n\n"
+        f"{state.playbook_text(['thumbnail_rules'])}\n"
         f"Write 3 different thumbnail concepts. For each give:\n"
         f"- image_prompt: a complete, detailed prompt for an AI image tool (Midjourney / ChatGPT / Ideogram / Leonardo), "
         f"16:9, ONE clear focal subject placed on the right third, the left 40% dark and empty for text, cozy warm firelight "

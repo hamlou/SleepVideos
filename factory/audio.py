@@ -39,10 +39,12 @@ class Voice:
         self.engine = "azure" if azure_key and azure_region else "edge"
         log(f"voice: {voice} via {self.engine}")
 
-    def _azure(self, text: str, dest: Path) -> None:
+    def _azure(self, sents: list[str], dest: Path) -> list[float]:
+        brk = f"<break time='{int(SENTENCE_GAP * 1000)}ms'/>"
+        body = brk.join(escape(t) for t in sents)
         ssml = (
             f"<speak version='1.0' xml:lang='en-US'><voice name='{self.voice}'>"
-            f"<prosody rate='{RATE}' pitch='{PITCH}'>{escape(text)}</prosody></voice></speak>"
+            f"<prosody rate='{RATE}' pitch='{PITCH}'>{body}</prosody></voice></speak>"
         )
         r = requests.post(
             f"https://{self.azure_region}.tts.speech.microsoft.com/cognitiveservices/v1",
@@ -53,58 +55,91 @@ class Voice:
                 "User-Agent": "sleep-factory",
             },
             data=ssml.encode("utf-8"),
-            timeout=120,
+            timeout=180,
         )
         if r.status_code != 200 or len(r.content) < 500:
             raise RuntimeError(f"azure tts HTTP {r.status_code}: {r.text[:120]}")
         dest.write_bytes(r.content)
+        return []
 
-    async def _edge(self, text: str, dest: Path) -> None:
+    async def _edge(self, sents: list[str], dest: Path) -> list[float]:
         import edge_tts
 
-        await edge_tts.Communicate(text, self.voice, rate=RATE, pitch=PITCH).save(str(dest))
+        audio_bytes, cuts = bytearray(), []
+        com = edge_tts.Communicate(" ".join(sents), self.voice, rate=RATE, pitch=PITCH, boundary="SentenceBoundary")
+        async for chunk in com.stream():
+            if chunk["type"] == "audio":
+                audio_bytes += chunk["data"]
+            elif chunk["type"] == "SentenceBoundary":
+                cuts.append((chunk["offset"] + chunk["duration"]) / 1e7)
+        if len(audio_bytes) < 500:
+            raise RuntimeError("No audio was received")
+        dest.write_bytes(bytes(audio_bytes))
+        return cuts[:-1]
 
-    async def _one(self, text: str, dest: Path, sem: asyncio.Semaphore) -> None:
+    def _with_pauses(self, raw: Path, cuts: list[float], dest: Path) -> None:
+        if not cuts:
+            raw.replace(dest)
+            return
+        edges = [0.0] + cuts + [None]
+        parts, labels = [], []
+        for i in range(len(edges) - 1):
+            a, b = edges[i], edges[i + 1]
+            trim = f"atrim=start={a:.3f}" + (f":end={b + 0.05:.3f}" if b is not None else "")
+            parts.append(f"[0]{trim},asetpts=PTS-STARTPTS[s{i}]")
+            labels.append(f"[s{i}]")
+            if b is not None:
+                parts.append(f"anullsrc=r=24000:cl=mono,atrim=duration={SENTENCE_GAP}[g{i}]")
+                labels.append(f"[g{i}]")
+        graph = ";".join(parts) + ";" + "".join(labels) + f"concat=n={len(labels)}:v=0:a=1[o]"
+        ff("-i", str(raw), "-filter_complex", graph, "-map", "[o]", "-ar", "24000", "-ac", "1",
+           "-c:a", "libmp3lame", "-b:a", "64k", str(dest))
+        raw.unlink(missing_ok=True)
+
+    async def _para(self, sents: list[str], dest: Path, sem: asyncio.Semaphore) -> bool:
         async with sem:
-            for attempt in range(6):
+            raw = dest.with_suffix(".raw.mp3")
+            for attempt in range(15):
                 try:
                     if self.engine == "azure":
-                        await asyncio.to_thread(self._azure, text, dest)
+                        cuts = await asyncio.to_thread(self._azure, sents, raw)
                     else:
-                        await self._edge(text, dest)
-                    if dest.exists() and dest.stat().st_size > 500:
-                        return
+                        cuts = await self._edge(sents, raw)
+                    await asyncio.to_thread(self._with_pauses, raw, cuts, dest)
+                    await asyncio.sleep(1.0)
+                    return True
                 except Exception as e:
-                    if attempt >= 2:
-                        log(f"  tts retry {attempt + 1}: {str(e)[:100]}")
-                await asyncio.sleep(3 * (attempt + 1))
-            raise RuntimeError(f"TTS failed for: {text[:60]}")
+                    if attempt >= 5:
+                        log(f"  tts retry {attempt + 1}: {str(e)[:80]}")
+                await asyncio.sleep(min(20, 2 + attempt * 1.5))
+            log(f"  ⚠ skipped paragraph after 15 tries: {sents[0][:60]}")
+            return False
 
     def chapter(self, text: str, work: Path, tag: str, dest: Path) -> float:
-        gaps = {}
-        for name, sec in (("s", SENTENCE_GAP), ("p", PARAGRAPH_GAP)):
-            g = work / f"gap_{name}.mp3"
-            if not g.exists():
-                ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", f"{sec}", "-c:a", "libmp3lame", "-b:a", "48k", str(g))
-            gaps[name] = g
-        jobs, order = [], []
+        gap = work / "gap_p.mp3"
+        if not gap.exists():
+            ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", f"{PARAGRAPH_GAP}", "-c:a", "libmp3lame", "-b:a", "64k", str(gap))
+        jobs = []
         for pi, para in enumerate(p for p in text.split("\n\n") if p.strip()):
-            for si, sent in enumerate(sentences(para)):
-                f = work / f"{tag}_{pi:03d}_{si:03d}.mp3"
-                jobs.append((sent, f))
-                order += [f, gaps["s"]]
-            if order:
-                order[-1] = gaps["p"]
+            sents = sentences(para)
+            if sents:
+                jobs.append((sents, work / f"{tag}_{pi:03d}.mp3"))
 
         async def run():
             sem = asyncio.Semaphore(4)
-            await asyncio.gather(*(self._one(t, f, sem) for t, f in jobs))
+            return await asyncio.gather(*(self._para(t, f, sem) for t, f in jobs))
 
-        asyncio.run(run())
+        ok = asyncio.run(run())
+        good = [f for (_, f), g in zip(jobs, ok) if g]
+        if len(good) < len(jobs) * 0.85:
+            raise RuntimeError(f"TTS failed for {len(jobs) - len(good)}/{len(jobs)} paragraphs")
+        order = []
+        for f in good:
+            order += [f, gap]
         lst = work / f"{tag}_list.txt"
-        lst.write_text("".join(f"file '{p.as_posix()}'\n" for p in order), encoding="utf-8")
+        lst.write_text("".join(f"file '{p.as_posix()}'\n" for p in order[:-1]), encoding="utf-8")
         ff("-f", "concat", "-safe", "0", "-i", str(lst), "-ar", "24000", "-ac", "1", "-c:a", "libmp3lame", "-b:a", "64k", str(dest))
-        for _, f in jobs:
+        for f in good:
             f.unlink(missing_ok=True)
         lst.unlink(missing_ok=True)
         from .media import duration
