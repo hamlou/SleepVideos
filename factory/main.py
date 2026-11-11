@@ -7,7 +7,7 @@ from pathlib import Path
 import requests
 
 from . import audio, broll, media, packaging, script, youtube
-from .config import Settings, load_job, mark_queue_done
+from .config import QUEUE_FILE, Settings, load_job, mark_queue_done
 from .llm import LLM
 from .log import log, step
 
@@ -37,8 +37,10 @@ def run() -> int:
     media.ensure_tools()
     job = load_job()
     if not job:
-        log("No job: topics.txt queue empty and no VIDEO_TITLE/TOPIC_LENS given. Nothing to do.")
-        return 0
+        log("topics.txt is empty → inventing a new topic")
+        title, topic = script.new_topic(LLM(s))
+        QUEUE_FILE.write_text(f"{title} | {topic}\n", encoding="utf-8")
+        job = load_job()
     log(f"JOB: {job.title} | {job.chapters} chapters | voice {job.voice} | privacy {job.privacy}")
     write_out(s.out_dir, "job.json", job.__dict__)
     youtube.check_auth(s)

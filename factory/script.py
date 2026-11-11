@@ -57,6 +57,30 @@ def clean_narration(raw: str) -> str:
     return "\n\n".join(out)
 
 
+def new_topic(llm: LLM) -> tuple[str, str]:
+    from .config import DONE_FILE
+
+    done = DONE_FILE.read_text(encoding="utf-8").splitlines() if DONE_FILE.exists() else []
+    used = "\n".join(f"- {d.split('|')[0].strip()}" for d in done[-60:]) or "- none yet"
+    raw = llm.ask(
+        "Invent ONE new topic for a calm 'history for sleep' YouTube video (2-3 hours of slow narration).\n"
+        "It must be everyday life in a specific place and era at night or in the evening: homes, food, crafts, "
+        "trades, travel, weather, nature, small routines. Vary eras and regions of the world over time.\n"
+        "Strictly NO religion of any kind (no churches, mosques, temples, monasteries, clergy, prayer, gods, "
+        "holy days), no wars, battles, disasters, crime or death.\n"
+        f"Already made (do not repeat or closely resemble):\n{used}\n\n"
+        'Return JSON: {"title": "short evocative title, max 60 chars", '
+        '"topic": "one line listing 5-6 concrete everyday subjects to cover, with place and century"}',
+        json_mode=True,
+        validate=lambda t: bool(parse_json(t).get("title") and parse_json(t).get("topic")),
+    )
+    d = parse_json(raw)
+    title = re.sub(r"[|\n]", " ", str(d["title"])).strip()[:80]
+    topic = re.sub(r"[|\n]", " ", str(d["topic"])).strip()
+    log(f"  new topic: {title}")
+    return title, topic
+
+
 def research(llm: LLM, job: Job) -> str:
     step("1/6 research")
     return llm.ask(
