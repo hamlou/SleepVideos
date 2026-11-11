@@ -57,6 +57,7 @@ class Images:
     def __init__(self, s: Settings):
         self.s = s
         self.ai_dead: set[str] = set()
+        self._hf_clients: dict = {}
         self.strikes: dict[str, int] = {}
         self.art_seen: set[str] = set()
         self.credits: list[str] = []
@@ -91,6 +92,37 @@ class Images:
             log(f"  cloudflare {name} HTTP {r.status_code}: {r.text[:120]}")
         return None
 
+    def _hf(self, prompt: str, seed: int, space: str) -> bytes | None:
+        from gradio_client import Client
+
+        key = f"hf:{space}"
+        if key in self.ai_dead:
+            return None
+        if key not in self._hf_clients:
+            try:
+                self._hf_clients[key] = Client(space, token=self.s.hf_token or None, verbose=False)
+            except Exception as e:
+                if not self.s.hf_token:
+                    raise
+                log(f"  HF token rejected ({str(e)[:80]}) → anonymous")
+                self._hf_clients[key] = Client(space, verbose=False)
+        dev = space.endswith("dev")
+        job = self._hf_clients[key].submit(
+            prompt=prompt, seed=seed, randomize_seed=False, width=1344, height=768,
+            num_inference_steps=28 if dev else 4, api_name="/infer",
+        )
+        try:
+            res = job.result(timeout=300)
+        except Exception as e:
+            msg = str(e).lower()
+            if "quota" in msg or "exceeded" in msg or "zerogpu" in msg:
+                self.ai_dead.add(key)
+                log(f"  {space} free GPU quota reached → next source")
+                return None
+            raise
+        path = res[0] if isinstance(res, (list, tuple)) else res
+        return Path(path).read_bytes()
+
     def _pollinations(self, prompt: str, seed: int) -> bytes | None:
         url = (
             f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"
@@ -114,9 +146,13 @@ class Images:
         return None
 
     def ai(self, prompt: str, seed: int, dest: Path, premium: bool = False) -> bool:
-        full = f"{prompt}, wide cinematic composition, rich oil painting, warm candlelight, deep blue shadows, no text, no watermark, no crosses, no religious symbols"
+        full = f"{prompt}, only ordinary homes, cottages, workshops, rooftops and chimneys, wide cinematic composition, rich oil painting, warm candlelight, deep blue shadows"
         cf = lambda p, sd: self._cloudflare(p, sd, premium)
-        for name, fn in (("cloudflare", cf), ("pollinations", self._pollinations)):
+        hf_schnell = lambda p, sd: self._hf(p, sd, "black-forest-labs/FLUX.1-schnell")
+        hf_dev = lambda p, sd: self._hf(p, sd, "black-forest-labs/FLUX.1-dev")
+        order = ([("cloudflare", cf), ("hf_schnell", hf_schnell), ("hf_dev", hf_dev)] if premium
+                 else [("hf_schnell", hf_schnell), ("cloudflare", cf)]) + [("pollinations", self._pollinations)]
+        for name, fn in order:
             if name in self.ai_dead:
                 continue
             for attempt in range(3):

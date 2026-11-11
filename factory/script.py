@@ -89,7 +89,7 @@ def outline(llm: LLM, job: Job, notes: str) -> list[dict]:
             f"\"art_query\": \"2-4 word search for a matching public-domain museum painting\", "
             f"\"image_prompts\": [\"3 detailed scene descriptions\"]}}]}}\n"
             f"Each image prompt: one concrete scene, warm candle or lantern light, deep blue night shadows, "
-            f"historical oil painting style, no people's faces in close-up, no text, no religious buildings or symbols (no crosses, churches, monks).\n\n"
+            f"historical oil painting style. Describe ONLY what is visible: homes, workshops, tools, food, fire, weather, landscape. Never mention what to exclude (image models misread 'no X' and draw X), and never include towers, spires, steeples or places of worship.\n\n"
             f"Research notes:\n{notes[:9000]}",
             json_mode=True,
             validate=_valid_json("chapters"),

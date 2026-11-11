@@ -93,7 +93,7 @@ def thumbnails(llm: LLM, imgs: media.Images, job: Job, title: str, fallback: Pat
         raw = llm.ask(
             f"Design 3 different YouTube thumbnails for a calm history sleep video titled '{title}' about {job.topic}.\n"
             f"Proven sleep-niche style: ONE clear subject, cozy warm light against deep night blue, "
-            f"lots of empty dark space on the left for text, no people looking at camera, no religious buildings, symbols or figures, painterly.\n"
+            f"lots of empty dark space on the left for text, no people looking at camera, painterly. Describe ONLY what is visible (homes, fire, food, tools, weather); never write 'no X' in a scene, and never include towers, spires or places of worship.\n"
             f"Text: 2-4 short words (max 18 characters total) that ADD a specific, TRUE curiosity hook drawn from "
             f"this topic's real details: a time, a number, an object or an odd custom. Never repeat the title. "
             f"Each of the 3 must use a different angle (time/number, odd fact, cozy promise).\n"
