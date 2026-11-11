@@ -34,6 +34,7 @@ class Settings:
     cohere: list[str] = field(default_factory=lambda: _keys("COHERE_API_KEY"))
     pollinations_token: str = field(default_factory=lambda: _env("POLLINATIONS_TOKEN"))
     hf_token: str = field(default_factory=lambda: _env("HF_TOKEN"))
+    pixabay_key: str = field(default_factory=lambda: _env("PIXABAY_API_KEY"))
     cf_account: str = field(default_factory=lambda: _env("CLOUDFLARE_ACCOUNT_ID"))
     cf_token: str = field(default_factory=lambda: _env("CLOUDFLARE_API_TOKEN"))
     yt_client_id: str = field(default_factory=lambda: _env("YOUTUBE_CLIENT_ID"))

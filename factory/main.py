@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 
-from . import audio, media, packaging, script, youtube
+from . import audio, broll, media, packaging, script, youtube
 from .config import Settings, load_job, mark_queue_done
 from .llm import LLM
 from .log import log, step
@@ -14,6 +14,7 @@ from .log import log, step
 GAP = 2.5
 INTRO_CUTS = 20
 INTRO_CUT_SEC = 6.0
+STOCK_SEC = 8.0
 INTRO_MOTIONS = ["pan_lr", "push", "pan_rl", "tilt_up", "pull"]
 GENERIC_ART = ["candlelight interior", "moonlight landscape", "night scene", "evening interior",
                "quiet library", "winter evening", "rain landscape", "fireside"]
@@ -132,15 +133,24 @@ def run() -> int:
         overlay = work / "particles.mp4"
         media.particles(overlay, s.fps)
         flat = [p for group in chapter_imgs for p in group]
+        stock = broll.Broll(s.pixabay_key, work, s.fps, seed=len(job.title))
+        stock.fetch(7)
         intro_n = min(INTRO_CUTS, int(min(durations[0] - 20, total * 0.25) // INTRO_CUT_SEC)) if durations[0] > 40 else 0
         jobs, segs = [], []
         for k in range(intro_n):
             dest = work / f"seg_intro_{k:03d}.mp4"
+            if k % 2 == 1 and stock.clip(INTRO_CUT_SEC, dest):
+                segs.append(dest)
+                continue
             jobs.append(dict(image=flat[k % len(flat)], sec=INTRO_CUT_SEC, dest=dest, overlay=overlay, fps=s.fps,
                              motion=INTRO_MOTIONS[k % len(INTRO_MOTIONS)]))
             segs.append(dest)
         for i, (ch, dur, group) in enumerate(zip(chapters, durations, chapter_imgs), 1):
             vis = dur - intro_n * INTRO_CUT_SEC if i == 1 else dur
+            opener = work / f"seg_{i:03d}_stock.mp4"
+            if i > 1 and vis > 60 and stock.clip(STOCK_SEC, opener):
+                segs.append(opener)
+                vis -= STOCK_SEC
             per = vis / len(group)
             for k, img in enumerate(group):
                 dest = work / f"seg_{i:03d}_{k}.mp4"
@@ -170,6 +180,7 @@ def run() -> int:
             "Visuals are AI-generated paintings and public-domain artworks.\n"
             + (f"\nArtwork credits:\n{credits}\n" if credits else "")
             + f"\n{audio.FIRE_CREDIT}\n"
+            + (f"{broll.CREDIT}\n" if stock.sources else "")
             + "\n#sleep #history #sleepstory"
         )
         write_out(s.out_dir, "metadata.json", {**meta, "title": title, "title_options": ranked,
