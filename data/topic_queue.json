@@ -1,11 +1,5 @@
 [
   {
-    "title": "Life in a Medieval Tavern on a Winter Night",
-    "topic": "Hearth cooking, ale brewing, straw mattresses, travelling merchants and the innkeeper's ledger in a 1300s English tavern",
-    "source": "seed",
-    "playbook_version": 0
-  },
-  {
     "title": "A Quiet Evening in Ancient Rome",
     "topic": "Insulae apartments, oil lamps, bathhouse closing time, night watchmen (vigiles), bread ovens and Roman bedtime habits",
     "source": "seed",
@@ -27,6 +21,13 @@
     "title": "A Snowy Night on a 1700s Colonial Farm",
     "topic": "Candle dipping, spinning wheels, hearth bread, warming pans and barn chores on a New England farm",
     "source": "seed",
+    "playbook_version": 0
+  },
+  {
+    "title": "Evening in a 19th-Century Parisian Apartment",
+    "topic": "Paris, 1850s: gas lamps, evening meals, leisure activities, fashion, urban sounds, neighborhood walks",
+    "why": "Combines the charm of 19th-century Paris with cozy, relatable evening routines.",
+    "source": "planner",
     "playbook_version": 0
   }
 ]
