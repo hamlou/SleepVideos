@@ -1,11 +1,5 @@
 [
   {
-    "title": "A Quiet Evening in Ancient Rome",
-    "topic": "Insulae apartments, oil lamps, bathhouse closing time, night watchmen (vigiles), bread ovens and Roman bedtime habits",
-    "source": "seed",
-    "playbook_version": 0
-  },
-  {
     "title": "One Night in a Victorian Lighthouse",
     "topic": "Lamp trimming, clockwork lens rotation, logbooks, foghorns, keepers' meals and storms on a 19th-century lighthouse",
     "source": "seed",
@@ -27,6 +21,13 @@
     "title": "Evening in a 19th-Century Parisian Apartment",
     "topic": "Paris, 1850s: gas lamps, evening meals, leisure activities, fashion, urban sounds, neighborhood walks",
     "why": "Combines the charm of 19th-century Paris with cozy, relatable evening routines.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Moonlit Tranquility in Mughal India",
+    "topic": "17th-century Agra, India: moonlit gardens, evening meals, silk weaving, lantern-lit streets, fragrant incense, soothing music",
+    "why": "Combines exoticism with serenity, offering a unique and relaxing historical setting.",
     "source": "planner",
     "playbook_version": 0
   }
