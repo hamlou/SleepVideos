@@ -1,11 +1,5 @@
 [
   {
-    "title": "One Night in a Victorian Lighthouse",
-    "topic": "Lamp trimming, clockwork lens rotation, logbooks, foghorns, keepers' meals and storms on a 19th-century lighthouse",
-    "source": "seed",
-    "playbook_version": 0
-  },
-  {
     "title": "The Night Shift in an Edo-Period Japanese Town",
     "topic": "Paper lanterns, fire watchmen, public baths, tea houses, futons and winter routines in 1700s Edo",
     "source": "seed",
@@ -28,6 +22,13 @@
     "title": "Moonlit Tranquility in Mughal India",
     "topic": "17th-century Agra, India: moonlit gardens, evening meals, silk weaving, lantern-lit streets, fragrant incense, soothing music",
     "why": "Combines exoticism with serenity, offering a unique and relaxing historical setting.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Evening by the Nile in Ancient Egypt",
+    "topic": "13th century BCE Egypt: farming, fishing, cooking, pottery, market trading, and sailing on the Nile",
+    "why": "Ancient Egypt is a popular and visually rich setting, offering a unique glimpse into daily life along the Nile, with a focus on peaceful activities and trades.",
     "source": "planner",
     "playbook_version": 0
   }
