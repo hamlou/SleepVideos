@@ -1,11 +1,5 @@
 [
   {
-    "title": "The Night Shift in an Edo-Period Japanese Town",
-    "topic": "Paper lanterns, fire watchmen, public baths, tea houses, futons and winter routines in 1700s Edo",
-    "source": "seed",
-    "playbook_version": 0
-  },
-  {
     "title": "A Snowy Night on a 1700s Colonial Farm",
     "topic": "Candle dipping, spinning wheels, hearth bread, warming pans and barn chores on a New England farm",
     "source": "seed",
@@ -29,6 +23,13 @@
     "title": "Evening by the Nile in Ancient Egypt",
     "topic": "13th century BCE Egypt: farming, fishing, cooking, pottery, market trading, and sailing on the Nile",
     "why": "Ancient Egypt is a popular and visually rich setting, offering a unique glimpse into daily life along the Nile, with a focus on peaceful activities and trades.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Lanterns and Tea in a Qing Dynasty Village",
+    "topic": "18th-century Chinese village life: tea ceremonies, silk weaving, lantern-lit streets, rice farming, and calligraphy",
+    "why": "Combines serene imagery with a focus on traditional crafts and routines, offering a peaceful escape.",
     "source": "planner",
     "playbook_version": 0
   }
