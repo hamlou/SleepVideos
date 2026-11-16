@@ -1,11 +1,5 @@
 [
   {
-    "title": "A Snowy Night on a 1700s Colonial Farm",
-    "topic": "Candle dipping, spinning wheels, hearth bread, warming pans and barn chores on a New England farm",
-    "source": "seed",
-    "playbook_version": 0
-  },
-  {
     "title": "Evening in a 19th-Century Parisian Apartment",
     "topic": "Paris, 1850s: gas lamps, evening meals, leisure activities, fashion, urban sounds, neighborhood walks",
     "why": "Combines the charm of 19th-century Paris with cozy, relatable evening routines.",
@@ -30,6 +24,13 @@
     "title": "Lanterns and Tea in a Qing Dynasty Village",
     "topic": "18th-century Chinese village life: tea ceremonies, silk weaving, lantern-lit streets, rice farming, and calligraphy",
     "why": "Combines serene imagery with a focus on traditional crafts and routines, offering a peaceful escape.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Evening in a 12th-Century Andalusian Courtyard",
+    "topic": "12th-century Moorish Spain: courtyard gardens, evening meals, water features, silk weaving, astronomy, and calligraphy",
+    "why": "Focuses on the serene and culturally rich aspects of Moorish Spain, emphasizing peaceful routines and beautiful surroundings.",
     "source": "planner",
     "playbook_version": 0
   }
