@@ -1,12 +1,5 @@
 [
   {
-    "title": "Moonlit Tranquility in Mughal India",
-    "topic": "17th-century Agra, India: moonlit gardens, evening meals, silk weaving, lantern-lit streets, fragrant incense, soothing music",
-    "why": "Combines exoticism with serenity, offering a unique and relaxing historical setting.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Evening by the Nile in Ancient Egypt",
     "topic": "13th century BCE Egypt: farming, fishing, cooking, pottery, market trading, and sailing on the Nile",
     "why": "Ancient Egypt is a popular and visually rich setting, offering a unique glimpse into daily life along the Nile, with a focus on peaceful activities and trades.",
@@ -31,6 +24,13 @@
     "title": "Evening in a 17th-Century Dutch Canal House",
     "topic": "Amsterdam, 17th century: canal-side homes, candlelit dinners, lace-making, evening markets, night watchmen, and moonlit canals",
     "why": "Focuses on cozy domestic life and peaceful urban routines, fitting the channel's calm theme.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Twilight Over a Tuscan Orchard",
+    "topic": "Tuscan countryside, 16th century: evening chores, grape harvest, local cheese tasting, shepherd’s lullaby, sunset over vineyards, nightly market gossip",
+    "why": "A sensory-rich setting that highlights simple, soothing rural life, appealing to viewers looking for gentle, pastoral calm.",
     "source": "planner",
     "playbook_version": 0
   }
