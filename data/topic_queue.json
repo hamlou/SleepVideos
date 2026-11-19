@@ -1,12 +1,5 @@
 [
   {
-    "title": "Evening by the Nile in Ancient Egypt",
-    "topic": "13th century BCE Egypt: farming, fishing, cooking, pottery, market trading, and sailing on the Nile",
-    "why": "Ancient Egypt is a popular and visually rich setting, offering a unique glimpse into daily life along the Nile, with a focus on peaceful activities and trades.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Lanterns and Tea in a Qing Dynasty Village",
     "topic": "18th-century Chinese village life: tea ceremonies, silk weaving, lantern-lit streets, rice farming, and calligraphy",
     "why": "Combines serene imagery with a focus on traditional crafts and routines, offering a peaceful escape.",
@@ -31,6 +24,13 @@
     "title": "Twilight Over a Tuscan Orchard",
     "topic": "Tuscan countryside, 16th century: evening chores, grape harvest, local cheese tasting, shepherd’s lullaby, sunset over vineyards, nightly market gossip",
     "why": "A sensory-rich setting that highlights simple, soothing rural life, appealing to viewers looking for gentle, pastoral calm.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Evening in a 16th-Century Ottoman Hamam",
+    "topic": "Istanbul, 16th century: steam baths, soap-making, marble floors, soft lighting, quiet conversations, herbal teas",
+    "why": "Focuses on relaxation and sensory details, aligning with sleep-inducing content.",
     "source": "planner",
     "playbook_version": 0
   }
