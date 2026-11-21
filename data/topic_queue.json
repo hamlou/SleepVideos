@@ -1,12 +1,5 @@
 [
   {
-    "title": "Evening in a 12th-Century Andalusian Courtyard",
-    "topic": "12th-century Moorish Spain: courtyard gardens, evening meals, water features, silk weaving, astronomy, and calligraphy",
-    "why": "Focuses on the serene and culturally rich aspects of Moorish Spain, emphasizing peaceful routines and beautiful surroundings.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Evening in a 17th-Century Dutch Canal House",
     "topic": "Amsterdam, 17th century: canal-side homes, candlelit dinners, lace-making, evening markets, night watchmen, and moonlit canals",
     "why": "Focuses on cozy domestic life and peaceful urban routines, fitting the channel's calm theme.",
@@ -31,6 +24,13 @@
     "title": "Sunset Over the Inca Terraces",
     "topic": "15th-century Inca Empire, evening routines in a mountain village, farming, weaving, communal feasts, herbal remedies, and stargazing",
     "why": "Exploring the peaceful aspects of Inca life, focusing on their connection to nature and community, offers a unique and relaxing historical perspective.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Evening in a 15th-Century Tuscan Villa",
+    "topic": "15th-century Tuscany, Italy: villa life, olive oil production, fresco painting, silk weaving, evening meals, and garden strolls",
+    "why": "Focuses on peaceful rural Italian life, combining art, nature, and crafts, appealing to viewers seeking relaxation.",
     "source": "planner",
     "playbook_version": 0
   }
