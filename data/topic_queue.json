@@ -1,12 +1,5 @@
 [
   {
-    "title": "Evening in a 17th-Century Dutch Canal House",
-    "topic": "Amsterdam, 17th century: canal-side homes, candlelit dinners, lace-making, evening markets, night watchmen, and moonlit canals",
-    "why": "Focuses on cozy domestic life and peaceful urban routines, fitting the channel's calm theme.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Twilight Over a Tuscan Orchard",
     "topic": "Tuscan countryside, 16th century: evening chores, grape harvest, local cheese tasting, shepherd’s lullaby, sunset over vineyards, nightly market gossip",
     "why": "A sensory-rich setting that highlights simple, soothing rural life, appealing to viewers looking for gentle, pastoral calm.",
@@ -31,6 +24,13 @@
     "title": "Evening in a 15th-Century Tuscan Villa",
     "topic": "15th-century Tuscany, Italy: villa life, olive oil production, fresco painting, silk weaving, evening meals, and garden strolls",
     "why": "Focuses on peaceful rural Italian life, combining art, nature, and crafts, appealing to viewers seeking relaxation.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Candlelit Calm in a 13th-Century Norwegian Longhouse",
+    "topic": "Norway, 13th century: hearth cooking, wool weaving, mead brewing, storytelling, herb drying, wood carving",
+    "why": "Combines cozy domestic activities with a unique historical setting, appealing to viewers seeking relaxation and cultural insight.",
     "source": "planner",
     "playbook_version": 0
   }
