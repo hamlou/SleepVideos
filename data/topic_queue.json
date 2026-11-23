@@ -1,12 +1,5 @@
 [
   {
-    "title": "Twilight Over a Tuscan Orchard",
-    "topic": "Tuscan countryside, 16th century: evening chores, grape harvest, local cheese tasting, shepherd’s lullaby, sunset over vineyards, nightly market gossip",
-    "why": "A sensory-rich setting that highlights simple, soothing rural life, appealing to viewers looking for gentle, pastoral calm.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Evening in a 16th-Century Ottoman Hamam",
     "topic": "Istanbul, 16th century: steam baths, soap-making, marble floors, soft lighting, quiet conversations, herbal teas",
     "why": "Focuses on relaxation and sensory details, aligning with sleep-inducing content.",
@@ -31,6 +24,13 @@
     "title": "Candlelit Calm in a 13th-Century Norwegian Longhouse",
     "topic": "Norway, 13th century: hearth cooking, wool weaving, mead brewing, storytelling, herb drying, wood carving",
     "why": "Combines cozy domestic activities with a unique historical setting, appealing to viewers seeking relaxation and cultural insight.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Firelight and Stories in a 10th-Century Viking Longhouse",
+    "topic": "Norway, 10th century: hearth cooking, wool weaving, mead brewing, storytelling, fur trading, winter preparations",
+    "why": "Combines cozy domesticity with the allure of Viking culture, focusing on peaceful routines.",
     "source": "planner",
     "playbook_version": 0
   }
