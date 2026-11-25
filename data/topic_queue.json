@@ -1,12 +1,5 @@
 [
   {
-    "title": "Sunset Over the Inca Terraces",
-    "topic": "15th-century Inca Empire, evening routines in a mountain village, farming, weaving, communal feasts, herbal remedies, and stargazing",
-    "why": "Exploring the peaceful aspects of Inca life, focusing on their connection to nature and community, offers a unique and relaxing historical perspective.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Evening in a 15th-Century Tuscan Villa",
     "topic": "15th-century Tuscany, Italy: villa life, olive oil production, fresco painting, silk weaving, evening meals, and garden strolls",
     "why": "Focuses on peaceful rural Italian life, combining art, nature, and crafts, appealing to viewers seeking relaxation.",
@@ -31,6 +24,13 @@
     "title": "Evening Whispers in a 18th-Century Mexican Hacienda",
     "topic": "18th-century rural Mexico: adobe homes, corn-based meals, weaving, candle-making, evening walks, starry skies",
     "why": "Combines a lesser-known setting with a focus on soothing, routine activities and natural beauty.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Evening in a 1920s Australian Outback Homestead",
+    "topic": "1920s rural Australia: homestead life, evening meals, stargazing, bush crafts, sheep farming, and outback travel",
+    "why": "Offers a unique setting with a focus on nature and rural routines, appealing to viewers interested in early 20th-century life outside urban areas.",
     "source": "planner",
     "playbook_version": 0
   }
