@@ -1,12 +1,5 @@
 [
   {
-    "title": "Evening in a 15th-Century Tuscan Villa",
-    "topic": "15th-century Tuscany, Italy: villa life, olive oil production, fresco painting, silk weaving, evening meals, and garden strolls",
-    "why": "Focuses on peaceful rural Italian life, combining art, nature, and crafts, appealing to viewers seeking relaxation.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Candlelit Calm in a 13th-Century Norwegian Longhouse",
     "topic": "Norway, 13th century: hearth cooking, wool weaving, mead brewing, storytelling, herb drying, wood carving",
     "why": "Combines cozy domestic activities with a unique historical setting, appealing to viewers seeking relaxation and cultural insight.",
@@ -31,6 +24,13 @@
     "title": "Evening in a 1920s Australian Outback Homestead",
     "topic": "1920s rural Australia: homestead life, evening meals, stargazing, bush crafts, sheep farming, and outback travel",
     "why": "Offers a unique setting with a focus on nature and rural routines, appealing to viewers interested in early 20th-century life outside urban areas.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Evening in a 18th-Century New England Coastal Village",
+    "topic": "Life in 18th-century New England coastal village: fishing, candle-making, hearth cooking, gardening, trade with ships, evening chores.",
+    "why": "Focuses on serene, routine activities in a well-loved historical setting, appealing to viewers seeking calm, nostalgic content.",
     "source": "planner",
     "playbook_version": 0
   }
