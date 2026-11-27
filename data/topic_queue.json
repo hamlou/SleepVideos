@@ -1,12 +1,5 @@
 [
   {
-    "title": "Candlelit Calm in a 13th-Century Norwegian Longhouse",
-    "topic": "Norway, 13th century: hearth cooking, wool weaving, mead brewing, storytelling, herb drying, wood carving",
-    "why": "Combines cozy domestic activities with a unique historical setting, appealing to viewers seeking relaxation and cultural insight.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Firelight and Stories in a 10th-Century Viking Longhouse",
     "topic": "Norway, 10th century: hearth cooking, wool weaving, mead brewing, storytelling, fur trading, winter preparations",
     "why": "Combines cozy domesticity with the allure of Viking culture, focusing on peaceful routines.",
@@ -31,6 +24,13 @@
     "title": "Evening in a 18th-Century New England Coastal Village",
     "topic": "Life in 18th-century New England coastal village: fishing, candle-making, hearth cooking, gardening, trade with ships, evening chores.",
     "why": "Focuses on serene, routine activities in a well-loved historical setting, appealing to viewers seeking calm, nostalgic content.",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "Evening Calm in a 19th-Century Scottish Croft",
+    "topic": "19th-century Scottish Highlands, focusing on hearth cooking, wool spinning, peat fires, evening chores, and starry skies",
+    "why": "Combines rustic charm with cozy routines, appealing to listeners seeking tranquility and historical warmth",
     "source": "planner",
     "playbook_version": 0
   }
