@@ -1,12 +1,5 @@
 [
   {
-    "title": "Firelight and Stories in a 10th-Century Viking Longhouse",
-    "topic": "Norway, 10th century: hearth cooking, wool weaving, mead brewing, storytelling, fur trading, winter preparations",
-    "why": "Combines cozy domesticity with the allure of Viking culture, focusing on peaceful routines.",
-    "source": "planner",
-    "playbook_version": 0
-  },
-  {
     "title": "Evening Whispers in a 18th-Century Mexican Hacienda",
     "topic": "18th-century rural Mexico: adobe homes, corn-based meals, weaving, candle-making, evening walks, starry skies",
     "why": "Combines a lesser-known setting with a focus on soothing, routine activities and natural beauty.",
@@ -31,6 +24,13 @@
     "title": "Evening Calm in a 19th-Century Scottish Croft",
     "topic": "19th-century Scottish Highlands, focusing on hearth cooking, wool spinning, peat fires, evening chores, and starry skies",
     "why": "Combines rustic charm with cozy routines, appealing to listeners seeking tranquility and historical warmth",
+    "source": "planner",
+    "playbook_version": 0
+  },
+  {
+    "title": "A Serene Evening in a 15th-Century Korean Hanok Village",
+    "topic": "15th-century Korea: hanok homes, kimchi preparation, rice farming, hanbok weaving, tea ceremonies, and evening market strolls",
+    "why": "Offers a unique, tranquil glimpse into traditional Korean life, blending cultural richness with soothing routines.",
     "source": "planner",
     "playbook_version": 0
   }
